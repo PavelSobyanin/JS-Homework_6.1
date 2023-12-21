@@ -1,49 +1,24 @@
-function click(e) {
-	removeTooltips(e);
+'use strict';
 
-	let targetTop = e.target.offsetTop;
+const toolTipList = Array.from(document.querySelectorAll('a.has-tooltip'));
+let innerTooltipText;
 
-	let left = e.target.offsetLeft - window.scrollX;
-	let top = targetTop - window.scrollY + e.target.offsetHeight;
-
-	document.getElementsByTagName("body")[0].innerHTML += `<div class="tooltip"
-      style="
-        left: ${left}px;
-        top: ${top}px;
-        display: block;
-      ">
-      ${e.target.getAttribute("title")}
-    </div>`;
-
-	let newTooltip = document.getElementsByClassName("tooltip")[0];
-
-	if (top + newTooltip.offsetHeight > window.innerHeight) {
-		top = targetTop - window.scrollY - newTooltip.offsetHeight;
-		newTooltip.style.top = `${top}px`;
-	}
-
-	addEvents();
-	e.preventDefault();
-}
-
-function removeTooltips(e) {
-	if (!e.defaultPrevented) {
-    [...document.getElementsByClassName("tooltip")].forEach(el => {
-			el.remove();
-		});
-	}
-}
-
-function addEvents() {
-	const tooltipItems = document.getElementsByClassName("has-tooltip");
-  [...tooltipItems].forEach(tooltipItem => {
-		tooltipItem.addEventListener("click", click);
-	});
-	document
-		.getElementsByTagName("body")[0]
-		.addEventListener("click", removeTooltips);
-	window.addEventListener("scroll", removeTooltips);
-	window.addEventListener("resize", removeTooltips);
-}
-
-addEvents();
+toolTipList.forEach(function (tip) {
+    tip.onclick = function (event) {
+        let tooltip = document.querySelector('div.tooltip_active');
+        let topCoordinate = tip.getBoundingClientRect().top < window.innerHeight / 2 ?  tip.getBoundingClientRect().bottom + 10 : tip.getBoundingClientRect().top - 30;
+        let leftCoordinate = tip.getBoundingClientRect().left < window.innerWidth / 2 ? tip.getBoundingClientRect().left + 10 : tip.getBoundingClientRect().left - 10;
+        let html = `<div class="tooltip tooltip_active" style="left: ${leftCoordinate}px; top: ${topCoordinate}px">${tip.title}</div>`;
+        if (tooltip && event.path[0].innerText == innerTooltipText) {
+            tooltip.classList.toggle('tooltip_active');
+        } else if (tooltip) {
+            tooltip.style.left = `${leftCoordinate}px`;
+            tooltip.style.top = `${topCoordinate}px`;
+            tooltip.textContent = `${tip.title}`;
+        } else {
+            tip.insertAdjacentHTML('afterend', html);
+        };
+        innerTooltipText = event.path[0].innerText;
+        return false;
+    };
+});
