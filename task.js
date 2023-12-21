@@ -1,5 +1,3 @@
-'use strict';
-
 const toolTipList = Array.from(document.querySelectorAll('a.has-tooltip'));
 let innerTooltipText;
 
